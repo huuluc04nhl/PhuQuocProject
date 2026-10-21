@@ -453,10 +453,10 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
               );
             })}
 
-            {/* Các căn hộ hiển thị với màu trạng thái nổi bật (Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê) */}
+            {/* CÁC ĐIỂM CHỌN CĂN HỘ HÌNH TRÒN TRỰC TIẾP TRÊN MẶT BẰNG PROJECT PLAN THEO YÊU CẦU */}
             {units.map((unit) => {
-              const isInSelectedZone = unit.zoneId === selectedZone.id;
               const isSelectedUnit = unit.id === selectedUnit.id;
+              const isInSelectedZone = unit.zoneId === selectedZone.id;
 
               const statusColor = unit.status === 'Trống'
                 ? '#10b981'
@@ -464,26 +464,102 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
                 ? '#f59e0b'
                 : '#ef4444';
 
+              const cx = unit.shape.centerX;
+              const cy = unit.shape.centerY;
+
               return (
-                <g key={`plan-unit-${unit.id}`} className="pointer-events-none">
+                <g
+                  key={`plan-unit-circle-${unit.id}`}
+                  onClick={(e) => {
+                    if (hasMovedRef.current) {
+                      e.stopPropagation();
+                      return;
+                    }
+                    e.stopPropagation(); // Chặn lan truyền click phân khu phía sau
+                    onSelectUnit(unit);
+                  }}
+                  className="cursor-pointer group"
+                  style={{ pointerEvents: 'all' }}
+                >
+                  {/* Khung nền mờ vị trí căn */}
                   <rect
                     x={unit.shape.x}
                     y={unit.shape.y}
                     width={unit.shape.width}
                     height={unit.shape.height}
-                    fill={isSelectedUnit ? `${statusColor}90` : isInSelectedZone ? `${statusColor}60` : `${statusColor}35`}
+                    fill={isSelectedUnit ? `${statusColor}40` : `${statusColor}20`}
                     stroke={isSelectedUnit ? '#0f172a' : statusColor}
-                    strokeWidth={isSelectedUnit ? 3.5 : 2}
-                    rx={1}
+                    strokeWidth={isSelectedUnit ? 2 : 1}
+                    strokeDasharray="2 2"
+                    rx={2}
+                    className="pointer-events-none"
                   />
+
+                  {/* Hiệu ứng sóng radar ping lan tỏa cho căn đang được chọn */}
                   {isSelectedUnit && (
                     <circle
-                      cx={unit.shape.centerX}
-                      cy={unit.shape.centerY}
-                      r={3}
-                      fill="#0f172a"
+                      cx={cx}
+                      cy={cy}
+                      r={18}
+                      fill={statusColor}
+                      fillOpacity={0.35}
+                      className="animate-ping"
                     />
                   )}
+
+                  {/* Vòng hào quang bên ngoài của hình tròn */}
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={isSelectedUnit ? 12 : 9}
+                    fill={isSelectedUnit ? '#0f172a' : '#ffffff'}
+                    filter="drop-shadow(0 2px 4px rgba(0,0,0,0.4))"
+                    className="transition-all duration-150"
+                  />
+
+                  {/* Vòng tròn màu trạng thái cốt lõi (Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê) */}
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={isSelectedUnit ? 8.5 : 6.5}
+                    fill={statusColor}
+                    stroke="#ffffff"
+                    strokeWidth={isSelectedUnit ? 2.5 : 1.5}
+                    className="transition-all duration-150"
+                  />
+
+                  {/* Tâm tròn trắng nổi bật */}
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={isSelectedUnit ? 3 : 2}
+                    fill="#ffffff"
+                  />
+
+                  {/* Tag nhãn mã căn hộ gắn ngay trên hình tròn */}
+                  <g className="pointer-events-none">
+                    <rect
+                      x={cx - 18}
+                      y={cy - (isSelectedUnit ? 26 : 22)}
+                      width={36}
+                      height={13}
+                      rx={3}
+                      fill={isSelectedUnit ? '#0f172a' : 'rgba(15, 23, 42, 0.85)'}
+                      filter="drop-shadow(0 1px 2px rgba(0,0,0,0.35))"
+                    />
+                    <text
+                      x={cx}
+                      y={cy - (isSelectedUnit ? 17 : 13)}
+                      fill="#ffffff"
+                      fontSize="8"
+                      fontWeight="900"
+                      textAnchor="middle"
+                      fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont"
+                      letterSpacing="0.3"
+                    >
+                      {unit.code}
+                    </text>
+                  </g>
                 </g>
               );
             })}

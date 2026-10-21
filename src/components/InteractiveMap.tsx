@@ -130,43 +130,50 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         const isSelected = unit.id === selectedUnit.id;
         const colorConfig = STATUS_COLORS[unit.status] || STATUS_COLORS['Trống'];
 
-        // Khung chữ nhật căn hộ nổi bật trên nền bản đồ
-        const rect = L.rectangle(unit.mapBounds, {
+        // Đa giác Polygon bám sát hình khối thực tế của căn nhà theo yêu cầu
+        const polygonCoords = unit.mapPolygon || [
+          [unit.mapBounds[0][0], unit.mapBounds[0][1]],
+          [unit.mapBounds[0][0], unit.mapBounds[1][1]],
+          [unit.mapBounds[1][0], unit.mapBounds[1][1]],
+          [unit.mapBounds[1][0], unit.mapBounds[0][1]],
+        ];
+
+        const polygon = L.polygon(polygonCoords, {
           color: isSelected ? '#0f172a' : colorConfig.stroke,
-          weight: isSelected ? 4.5 : 3.5, // Border dày và nổi bật hơn
+          weight: isSelected ? 5 : 3.5, // Border dày và nổi bật hơn
           fillColor: isSelected ? colorConfig.stroke : colorConfig.fill,
-          fillOpacity: isSelected ? 0.6 : 0.4, // Màu nền rõ nét, nổi rõ trên map
+          fillOpacity: isSelected ? 0.65 : 0.45, // Màu nền rõ nét, nổi rõ trên map
           className: 'cursor-pointer transition-all drop-shadow-md',
         });
 
         // Hover effect: phóng sáng border
-        rect.on('mouseover', () => {
+        polygon.on('mouseover', () => {
           if (!isSelected) {
-            rect.setStyle({
-              weight: 4.5,
-              fillOpacity: 0.55,
+            polygon.setStyle({
+              weight: 5,
+              fillOpacity: 0.65,
             });
           }
         });
 
-        rect.on('mouseout', () => {
+        polygon.on('mouseout', () => {
           if (!isSelected) {
-            rect.setStyle({
+            polygon.setStyle({
               color: colorConfig.stroke,
               weight: 3.5,
-              fillOpacity: 0.4,
+              fillOpacity: 0.45,
             });
           }
         });
 
         // Click trực tiếp vào khung căn hộ để chọn
-        rect.on('click', () => {
+        polygon.on('click', () => {
           onSelectUnit(unit);
         });
 
         // Tooltip với màu sắc tương ứng
         const statusDot = unit.status === 'Trống' ? '🟢' : unit.status === 'Đang xem' ? '🟡' : '🔴';
-        rect.bindTooltip(
+        polygon.bindTooltip(
           `<div style="font-weight: 800; font-size: 11px; padding: 3px 6px; display: flex; align-items: center; gap: 4px;">
             <span>${statusDot}</span>
             <span>${unit.code} &bull; ${unit.status}</span>
@@ -179,7 +186,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           }
         );
 
-        rect.addTo(layersGroup);
+        polygon.addTo(layersGroup);
       });
 
       // Pin định vị căn đang chọn với hiệu ứng viewfinder và vòng sóng đồng màu

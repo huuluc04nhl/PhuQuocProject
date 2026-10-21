@@ -102,6 +102,12 @@ export const DEMO_UNITS: Unit[] = [
       [10.84015, 106.83935],
       [10.84050, 106.83995],
     ],
+    mapPolygon: [
+      [10.84052, 106.83940],
+      [10.84045, 106.83995],
+      [10.84010, 106.83980],
+      [10.84017, 106.83925],
+    ],
     videoUrl: 'https://www.youtube.com/watch?v=jYk7ZBb1hA4',
     images: [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
@@ -146,6 +152,12 @@ export const DEMO_UNITS: Unit[] = [
       [10.83827, 106.83865],
       [10.83880, 106.83955],
     ],
+    mapPolygon: [
+      [10.83878, 106.83875],
+      [10.83870, 106.83945],
+      [10.83832, 106.83935],
+      [10.83840, 106.83865],
+    ],
     videoUrl: 'https://www.youtube.com/watch?v=M8nzM4p9xF4',
     images: [
       'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?auto=format&fit=crop&w=1200&q=80',
@@ -189,6 +201,12 @@ export const DEMO_UNITS: Unit[] = [
     mapBounds: [
       [10.84025, 106.84095],
       [10.84055, 106.84145],
+    ],
+    mapPolygon: [
+      [10.84055, 106.84105],
+      [10.84050, 106.84140],
+      [10.84022, 106.84132],
+      [10.84027, 106.84097],
     ],
     videoUrl: 'https://www.youtube.com/watch?v=1IAsjVODFFU',
     images: [
@@ -238,6 +256,12 @@ export const DEMO_UNITS: Unit[] = [
       [10.83725, 106.84415],
       [10.83775, 106.84485],
     ],
+    mapPolygon: [
+      [10.83775, 106.84420],
+      [10.83765, 106.84485],
+      [10.83725, 106.84475],
+      [10.83735, 106.84410],
+    ],
     videoUrl: 'https://www.youtube.com/watch?v=-ngXMfgjQuM',
     images: [
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
@@ -281,6 +305,12 @@ export const DEMO_UNITS: Unit[] = [
     mapBounds: [
       [10.83630, 106.84320],
       [10.83670, 106.84380],
+    ],
+    mapPolygon: [
+      [10.83670, 106.84325],
+      [10.83665, 106.84378],
+      [10.83630, 106.84370],
+      [10.83635, 106.84317],
     ],
     images: [
       'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
@@ -329,6 +359,12 @@ export const DEMO_UNITS: Unit[] = [
     mapBounds: [
       [10.84110, 106.85190],
       [10.84190, 106.85310],
+    ],
+    mapPolygon: [
+      [10.84185, 106.85200],
+      [10.84180, 106.85305],
+      [10.84115, 106.85295],
+      [10.84120, 106.85190],
     ],
     videoUrl: 'https://www.youtube.com/watch?v=Q8bweRzaLBk',
     images: [

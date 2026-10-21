@@ -61,6 +61,9 @@ export interface Unit {
   // Khung chữ nhật của căn hộ trực tiếp trên bản đồ thực tế [[latMin, lngMin], [latMax, lngMax]]
   mapBounds: [[number, number], [number, number]];
 
+  // Đa giác polygon bám sát hình khối kiến trúc thực tế của căn nhà [[lat, lng], ...]
+  mapPolygon: [number, number][];
+
   images: string[];
   videoUrl?: string;
 }
