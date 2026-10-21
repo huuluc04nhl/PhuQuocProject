@@ -139,6 +139,7 @@ export default function Home() {
                 selectedUnit={selectedUnit}
                 units={units}
                 onSelectUnit={handleSelectUnit}
+                mobileView={mobileView}
               />
             </div>
 
