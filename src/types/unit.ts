@@ -42,7 +42,7 @@ export interface Unit {
   
   // Khung hình học chuẩn xác theo hệ tọa độ SVG 1024x778 của bản đồ
   shape: {
-    type: 'rect' | 'polygon';
+    type: 'rect' | 'polygon' | 'circle';
     x?: number;
     y?: number;
     width?: number;

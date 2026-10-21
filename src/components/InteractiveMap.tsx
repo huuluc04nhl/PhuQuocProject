@@ -113,8 +113,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       const map = mapInstanceRef.current;
       const layersGroup = layersGroupRef.current;
 
-      // Di chuyển bản đồ đến khu vực được chọn
-      map.flyTo([selectedUnit.mapCoords.lat, selectedUnit.mapCoords.lng], selectedZone.zoom || 17, {
+      // Di chuyển bản đồ đến đúng vị trí căn hộ và zoom vào gần (zoom 18) để thấy rõ khối nhà polygon
+      map.flyTo([selectedUnit.mapCoords.lat, selectedUnit.mapCoords.lng], 18, {
         duration: 0.8,
       });
 
@@ -217,7 +217,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const handleResetCenter = () => {
     mapInstanceRef.current?.flyTo(
       [selectedUnit.mapCoords.lat, selectedUnit.mapCoords.lng],
-      selectedZone.zoom || 17
+      18
     );
   };
 

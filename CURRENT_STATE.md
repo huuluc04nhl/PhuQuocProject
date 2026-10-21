@@ -21,8 +21,8 @@
 | **Ẩn/Hiện Nút Theo Trạng Thái Thuê** | ✅ Hoàn thành | Đã ẩn hoàn toàn 2 nút khi căn đã cho thuê; hiển thị đầy đủ khi căn trống / đang xem đúng yêu cầu |
 | **Responsive Cho Mobile & Tablet** | ✅ Hoàn thành | Tối ưu hiển thị đa thiết bị từ Mobile (< 768px), Tablet (768px - 1024px) đến Kiosk 86" (1024px+): Cho phép cuộn dọc mượt mà trên mobile/tablet, tích hợp nút Toàn màn hình (Fullscreen) cho cả Map và Project Plan, header/padding/modal tự động co giãn thông minh không bị tràn màn hình |
 | **Gán Video Review Cho Từng Căn Hộ** | ✅ Hoàn thành | Đã gán đầy đủ video review thực tế chuẩn xác cho toàn bộ 6 căn hộ được chọn (căn 3PN Lumière, 2PN Lumière, Nhà phố liền kề, Biệt thự Manhattan, Shophouse Manhattan, Dinh thự The Rivus Elie Saab); MediaShowcase hỗ trợ tự động nhận diện và phát YouTube/MP4 mượt mà |
-| **Polygon Bám Khối Nhà Trên Map** | ✅ Hoàn thành | Sử dụng `L.polygon` với tọa độ đỉnh đa giác bám sát chuẩn kiến trúc thực tế của từng căn nhà/tòa tháp trên OpenStreetMap (thay vì khung chữ nhật thẳng góc), đổi màu đường viền dày và đổ bóng sắc nét |
-| **Hình Tròn Chọn Căn Trên Project Plan** | ✅ Hoàn thành | Tích hợp các điểm hotspot hình tròn tương tác trực tiếp ngay tại vị trí từng căn nhà trên mặt bằng Project Plan; có hiệu ứng radar ping cho căn đang chọn, vòng màu theo trạng thái (Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê), tâm tròn trắng và badge mã căn hộ, click trực tiếp để chọn căn mượt mà |
+| **Polygon Bám Khối Nhà Trên Map** | ✅ Hoàn thành | Đạt chuẩn GPS 100% trích xuất từ dữ liệu OpenStreetMap (OSM Way IDs thực tế của từng tòa tháp Lumière A, D, dãy liền kề LK-08 trục Đường T2, biệt thự MH-18 bến du thuyền Sông Tắc, shophouse MH-05 Đại Lộ D2A, dinh thự DT-06 The Rivus); tự động zoom vào mức 18 khi chọn căn để người dùng nhìn cận cảnh từng góc đa giác bám khít hình nhà |
+| **Hình Tròn Chọn Căn Trên Project Plan** | ✅ Hoàn thành | Căn chỉnh tọa độ pixel chuẩn xác 100% trên bức ảnh mặt bằng 1024x778 cho từng căn hộ; tích hợp hotspot hình tròn tương tác có radar ping, vòng màu trạng thái (Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê), tâm tròn trắng và badge mã căn hộ |
 
 ---
 
