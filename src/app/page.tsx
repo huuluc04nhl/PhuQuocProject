@@ -1,11 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { DEMO_UNITS, DEMO_ZONES } from '@/data/units';
 import { Unit, Zone } from '@/types/unit';
 import { Header } from '@/components/Header';
-import { InteractiveMap } from '@/components/InteractiveMap';
 import { ProjectPlan } from '@/components/ProjectPlan';
+
+// Tải InteractiveMap ở Client-side (ssr: false) để tránh lỗi hydration và hiển thị hoàn hảo trên mọi thiết bị / máy khác
+const InteractiveMap = dynamic(
+  () => import('@/components/InteractiveMap').then((mod) => mod.InteractiveMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400 gap-2">
+        <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin"></div>
+        <span className="text-[10px] font-bold tracking-widest uppercase">Đang khởi tạo bản đồ...</span>
+      </div>
+    ),
+  }
+);
 import { MediaShowcase } from '@/components/MediaShowcase';
 import { UnitInfo } from '@/components/UnitInfo';
 import { ActionButtons } from '@/components/ActionButtons';

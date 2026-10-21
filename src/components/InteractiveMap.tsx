@@ -51,6 +51,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const mapInstanceRef = useRef<any>(null);
   const layersGroupRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
@@ -96,9 +97,30 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       mapInstanceRef.current = map;
       isInitializedRef.current = true;
       setIsMapReady(true);
+
+      // Kích hoạt tính toán kích thước bản đồ ngay lập tức để tránh lỗi màn hình xám trên máy khác
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 150);
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 500);
+
+      // ResizeObserver tự động cập nhật khi khung chứa thay đổi kích thước trên mọi thiết bị
+      if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+        const ro = new ResizeObserver(() => {
+          map.invalidateSize();
+        });
+        ro.observe(mapContainerRef.current);
+        resizeObserverRef.current = ro;
+      }
     });
 
     return () => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -261,8 +283,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       </div>
 
       {/* Viewport 100% Bản đồ thực tế với các khung căn hộ nổi bật */}
-      <div className="relative flex-1 w-full h-full bg-slate-100 overflow-hidden">
-        <div ref={mapContainerRef} className="w-full h-full z-0" />
+      <div className="relative flex-1 w-full min-h-0 bg-slate-100 overflow-hidden">
+        <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
 
         {/* Minimal Zoom, Recenter, & Fullscreen Controls */}
         <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 flex flex-col bg-white shadow-md rounded border border-slate-200 overflow-hidden">
