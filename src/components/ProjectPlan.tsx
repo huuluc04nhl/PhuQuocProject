@@ -253,7 +253,7 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
       }`}
     >
       {/* Header bar: Minimal wireframe style (Đã bỏ bộ tỷ lệ % theo yêu cầu) */}
-      <div className="h-8 px-2 sm:px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
+      <div className="h-9 sm:h-8 px-2 sm:px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="text-[10px] sm:text-[11px] font-black tracking-widest text-slate-800 uppercase">
             PROJECT PLAN
@@ -261,38 +261,41 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
           <span className="text-[9px] sm:text-[10px] text-slate-500 font-bold hidden sm:inline">
             (Kéo chuột &bull; Lăn zoom)
           </span>
+          <span className="text-[9px] text-slate-500 font-bold sm:hidden">
+            (Chạm &bull; Kéo &bull; Zoom)
+          </span>
         </div>
 
-        {/* Nút điều khiển Zoom và Fullscreen */}
-        <div className="flex items-center gap-1">
+        {/* Nút điều khiển Zoom và Fullscreen - Tối ưu kích thước chạm cho mobile & tablet */}
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <button
             onClick={handleZoomIn}
-            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            className="p-1.5 sm:p-1 rounded text-slate-600 hover:text-black active:bg-slate-200 hover:bg-slate-200 transition"
             title="Phóng to (hoặc lăn chuột lên)"
           >
-            <ZoomIn className="w-3.5 h-3.5" />
+            <ZoomIn className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            className="p-1.5 sm:p-1 rounded text-slate-600 hover:text-black active:bg-slate-200 hover:bg-slate-200 transition"
             title="Thu nhỏ (hoặc lăn chuột xuống)"
           >
-            <ZoomOut className="w-3.5 h-3.5" />
+            <ZoomOut className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </button>
           <button
             onClick={handleResetZoom}
-            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            className="p-1.5 sm:p-1 rounded text-slate-600 hover:text-black active:bg-slate-200 hover:bg-slate-200 transition"
             title="Đặt lại vị trí & tỷ lệ mặc định"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </button>
-          <div className="h-3 w-px bg-slate-300 mx-0.5" />
+          <div className="h-4 sm:h-3 w-px bg-slate-300 mx-1 sm:mx-0.5" />
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            className="p-1.5 sm:p-1 rounded text-slate-600 hover:text-black active:bg-slate-200 hover:bg-slate-200 transition"
             title={isExpanded ? 'Thu nhỏ' : 'Toàn màn hình'}
           >
-            {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {isExpanded ? <Minimize2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" /> : <Maximize2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />}
           </button>
         </div>
       </div>

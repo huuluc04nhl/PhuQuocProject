@@ -33,6 +33,8 @@ export default function Home() {
   const [selectedUnit, setSelectedUnit] = useState<Unit>(DEMO_UNITS[0]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  // Chế độ hiển thị trên Mobile / Tablet: 'split' (chồng chuẩn wireframe) | 'map' (toàn bản đồ) | 'plan' (toàn mặt bằng)
+  const [mobileView, setMobileView] = useState<'split' | 'map' | 'plan'>('split');
 
   // 1. Khi chọn phân khu được đóng khung ở PROJECT PLAN
   const handleSelectZone = (zone: Zone) => {
@@ -73,52 +75,110 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen lg:h-screen w-full bg-white text-slate-900 overflow-y-auto lg:overflow-hidden font-sans select-none border-2 border-slate-900">
+    <div className="flex flex-col min-h-screen lg:h-screen w-full bg-white text-slate-900 overflow-x-hidden overflow-y-auto lg:overflow-hidden font-sans select-none border-0 md:border-2 border-slate-900">
       {/* 1. Header (Logo & Single Horizontal Divider Line - Chuẩn wireframe) */}
       <Header />
 
       {/* 2. Main Body: Layout chuẩn Wireframe với PROJECT PLAN THU GỌN VÀ CHỒNG LÊN MAP */}
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 min-h-0 bg-white">
+      <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 p-2 sm:p-4 lg:p-6 min-h-0 bg-white">
         {/* CỘT TRÁI: MAP & PROJECT PLAN CHỒNG LÊN NHAU ĐÚNG BẢN VẼ WIREFRAME */}
-        <section className="lg:col-span-7 xl:col-span-8 relative h-[480px] sm:h-[540px] md:h-[580px] lg:h-full overflow-hidden flex flex-col">
-          {/* KHỐI MAP (Nằm trên, chiếm 74% chiều cao cột trái, góc dưới lộ ra hai bên) */}
-          <div className="w-full h-[72%] sm:h-[74%] border-2 border-slate-900 bg-white overflow-hidden shadow-xs">
-            <InteractiveMap
-              selectedZone={selectedZone}
-              selectedUnit={selectedUnit}
-              units={units}
-              onSelectUnit={handleSelectUnit}
-            />
+        <section className="lg:col-span-7 xl:col-span-8 relative h-[440px] sm:h-[500px] md:h-[560px] lg:h-full overflow-hidden flex flex-col shrink-0">
+          {/* Segmented View Switcher trên Mobile & Tablet (< lg) giúp thao tác chạm dễ dàng */}
+          <div className="lg:hidden shrink-0 pb-2 z-30">
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-300 text-xs font-black w-full shadow-inner">
+              <button
+                onClick={() => setMobileView('map')}
+                className={`flex-1 py-1.5 px-1.5 sm:px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-[11px] sm:text-xs ${
+                  mobileView === 'map'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>🗺️</span>
+                <span>Bản đồ (Map)</span>
+              </button>
+              <button
+                onClick={() => setMobileView('plan')}
+                className={`flex-1 py-1.5 px-1.5 sm:px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-[11px] sm:text-xs ${
+                  mobileView === 'plan'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>📐</span>
+                <span>Mặt bằng</span>
+              </button>
+              <button
+                onClick={() => setMobileView('split')}
+                className={`flex-1 py-1.5 px-1.5 sm:px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-[11px] sm:text-xs ${
+                  mobileView === 'split'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>📑</span>
+                <span>Gộp (Chồng)</span>
+              </button>
+            </div>
           </div>
 
-          {/* KHỐI PROJECT PLAN (THU GỌN LẠI 1 XÍU, NẰM GỌN GÀNG ĐÚNG WIREFRAME) */}
-          <div className="absolute bottom-0 left-[3%] right-[3%] sm:left-[6%] sm:right-[6%] lg:left-[8%] lg:right-[8%] h-[48%] sm:h-[46%] border-2 border-slate-900 bg-white shadow-2xl z-20 overflow-hidden flex flex-col">
-            <ProjectPlan
-              zones={zones}
-              selectedZone={selectedZone}
-              onSelectZone={handleSelectZone}
-              selectedUnit={selectedUnit}
-              units={units}
-              onSelectUnit={handleSelectUnit}
-            />
+          {/* Vùng chứa Map & Project Plan */}
+          <div className="relative flex-1 w-full min-h-0 flex flex-col overflow-hidden">
+            {/* KHỐI MAP (Nằm trên, chiếm 74% chiều cao cột trái ở desktop, toàn màn hình khi chọn tab Map trên mobile) */}
+            <div
+              className={`w-full border-2 border-slate-900 bg-white overflow-hidden shadow-xs transition-all duration-200 ${
+                mobileView === 'map'
+                  ? 'h-full flex-1'
+                  : mobileView === 'plan'
+                  ? 'hidden lg:block lg:h-[74%]'
+                  : 'h-[68%] sm:h-[72%] lg:h-[74%]'
+              }`}
+            >
+              <InteractiveMap
+                selectedZone={selectedZone}
+                selectedUnit={selectedUnit}
+                units={units}
+                onSelectUnit={handleSelectUnit}
+              />
+            </div>
+
+            {/* KHỐI PROJECT PLAN (Nổi ở dưới chồng lên map chuẩn wireframe, toàn màn hình khi chọn tab Plan trên mobile) */}
+            <div
+              className={`border-2 border-slate-900 bg-white shadow-2xl z-20 overflow-hidden flex flex-col transition-all duration-200 ${
+                mobileView === 'plan'
+                  ? 'relative h-full flex-1 w-full'
+                  : mobileView === 'map'
+                  ? 'hidden lg:flex lg:absolute lg:bottom-0 lg:left-[8%] lg:right-[8%] lg:h-[46%]'
+                  : 'absolute bottom-0 left-[2%] right-[2%] sm:left-[5%] sm:right-[5%] lg:left-[8%] lg:right-[8%] h-[52%] sm:h-[48%] lg:h-[46%]'
+              }`}
+            >
+              <ProjectPlan
+                zones={zones}
+                selectedZone={selectedZone}
+                onSelectZone={handleSelectZone}
+                selectedUnit={selectedUnit}
+                units={units}
+                onSelectUnit={handleSelectUnit}
+              />
+            </div>
           </div>
         </section>
 
         {/* CỘT PHẢI: VIDEO / IMAGE, INFO, VÀ BUTTONS (Đúng 3 khối riêng biệt của wireframe) */}
         <section className="lg:col-span-5 xl:col-span-4 flex flex-col gap-3 sm:gap-4 lg:h-full lg:overflow-hidden">
           {/* KHỐI 1: VIDEO / IMAGE (Khung bo góc tròn lớn rounded-3xl đúng wireframe) */}
-          <div className="shrink-0 h-[220px] sm:h-[260px] lg:h-[30%] min-h-[180px] border-2 border-slate-900 rounded-3xl overflow-hidden shadow-xs bg-black">
+          <div className="shrink-0 aspect-video sm:aspect-auto sm:h-[240px] md:h-[260px] lg:h-[30%] min-h-[170px] border-2 border-slate-900 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs bg-black">
             <MediaShowcase unit={selectedUnit} />
           </div>
 
           {/* KHỐI 2: INFO (Khung chữ nhật sắc nét đúng wireframe) */}
-          <div className="flex-1 min-h-[300px] lg:min-h-0 border-2 border-slate-900 overflow-hidden flex flex-col bg-white shadow-xs">
+          <div className="flex-1 min-h-[260px] lg:min-h-0 border-2 border-slate-900 overflow-hidden flex flex-col bg-white shadow-xs">
             <UnitInfo unit={selectedUnit} />
           </div>
 
           {/* KHỐI 3: BOOKING & CONTACT (2 nút bo góc - Ẩn hoàn toàn nếu căn đã cho thuê) */}
           {selectedUnit.status !== 'Đã cho thuê' && (
-            <div className="shrink-0 h-11 sm:h-12 pb-2 lg:pb-0">
+            <div className="shrink-0 h-12 pb-2 lg:pb-0">
               <ActionButtons
                 unit={selectedUnit}
                 onOpenBooking={() => setIsBookingOpen(true)}
@@ -130,7 +190,7 @@ export default function Home() {
       </main>
 
       {/* 3. Footer Line chuẩn wireframe */}
-      <footer className="h-3 border-t-2 border-slate-900 shrink-0 bg-white" />
+      <footer className="h-2 sm:h-3 border-t-2 border-slate-900 shrink-0 bg-white" />
 
       {/* Modals */}
       <BookingModal
