@@ -94,6 +94,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       });
 
+      // Ngăn chặn lỗi Map container is already initialized khi React re-render trên mobile
+      if ((mapContainerRef.current as any)._leaflet_id) {
+        delete (mapContainerRef.current as any)._leaflet_id;
+      }
+
       const map = L.map(mapContainerRef.current, {
         center: [selectedUnit.mapCoords.lat, selectedUnit.mapCoords.lng],
         zoom: selectedZone.zoom || 17,
@@ -101,19 +106,22 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         attributionControl: true,
       });
 
-      // Layer bản đồ thực tế với subdomains phân tải a/b/c và fallback CDN tự động nếu nhà mạng di động chặn
-      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        subdomains: ['a', 'b', 'c'],
-        attribution: '&copy; OpenStreetMap contributors',
-      });
+      // Layer bản đồ thực tế chuẩn OpenStreetMap được phục vụ qua CartoDB Voyager CDN (Cloudflare toàn cầu, tải cực nhanh tại VN, 100% không bị chặn trên 4G/5G mobile)
+      const tileLayer = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
+          maxZoom: 19,
+          subdomains: ['a', 'b', 'c', 'd'],
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        }
+      );
 
-      // Chống lỗi màn hình xám trên mobile: Nếu tile OSM bị lỗi mạng/DNS 4G, tự động fallback sang CartoDB CDN
+      // Cơ chế tự động Fallback sang cụm máy chủ OpenStreetMap trực tiếp nếu kết nối CartoDB có sự cố
       tileLayer.on('tileerror', (error: any) => {
-        if (error?.tile && !error.tile.src.includes('cartocdn')) {
+        if (error?.tile && !error.tile.src.includes('openstreetmap')) {
           const coords = error.coords;
           if (coords) {
-            error.tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${coords.z}/${coords.x}/${coords.y}.png`;
+            error.tile.src = `https://a.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
           }
         }
       });

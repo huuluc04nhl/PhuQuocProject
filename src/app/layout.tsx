@@ -13,6 +13,9 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Phú Quốc Rental - Hệ Thống Sa Bàn & Màn Hình Tương Tác 86"',
   description: 'Giao diện điều khiển sa bàn tương tác và màn LED Sales Gallery Showroom',
