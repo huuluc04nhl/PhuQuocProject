@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Unit, Zone } from '@/types/unit';
-import { ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, Focus } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, Move } from 'lucide-react';
 
 interface ProjectPlanProps {
   zones: Zone[];
@@ -21,14 +21,156 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
   units,
   onSelectUnit,
 }) => {
-  // Khởi tạo mức zoom mặc định 1.2x để ảnh hiển thị to, rõ nét, choán đầy không gian
+  // Quản lý Pan (vị trí kéo x, y) và Zoom (độ phóng đại)
   const [zoomLevel, setZoomLevel] = useState<number>(1.2);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [hoveredZoneId, setHoveredZoneId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const handleZoomIn = () => setZoomLevel((prev) => Math.min(Number((prev + 0.25).toFixed(2)), 2.8));
-  const handleZoomOut = () => setZoomLevel((prev) => Math.max(Number((prev - 0.25).toFixed(2)), 0.9));
-  const handleResetZoom = () => setZoomLevel(1.2);
+  // Refs để lưu trữ state tức thời cho mouse events & touch events
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const zoomRef = useRef<number>(1.2);
+  const hasMovedRef = useRef<boolean>(false);
+  const touchStartRef = useRef<{ x: number; y: number; dist?: number }>({ x: 0, y: 0 });
+
+  // Giữ ref đồng bộ
+  panRef.current = pan;
+  zoomRef.current = zoomLevel;
+
+  // Lăn chuột phóng to / thu nhỏ tại vị trí con trỏ chuột (tương tự Google Maps / Leaflet)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left - rect.width / 2;
+      const mouseY = e.clientY - rect.top - rect.height / 2;
+
+      const zoomFactor = e.deltaY < 0 ? 1.18 : 0.85;
+      const currentZoom = zoomRef.current;
+      const nextZoom = Math.max(0.7, Math.min(4.5, Number((currentZoom * zoomFactor).toFixed(3))));
+
+      if (nextZoom === currentZoom) return;
+
+      const actualFactor = nextZoom / currentZoom;
+      const currentPan = panRef.current;
+
+      // Giữ điểm dưới con trỏ chuột đứng yên khi phóng to / thu nhỏ
+      setPan({
+        x: mouseX - (mouseX - currentPan.x) * actualFactor,
+        y: mouseY - (mouseY - currentPan.y) * actualFactor,
+      });
+      setZoomLevel(nextZoom);
+    };
+
+    container.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', onWheel);
+    };
+  }, []);
+
+  // Xử lý kéo thả toàn màn hình (kể cả khi thả chuột ra ngoài container)
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      if (!hasMovedRef.current && Math.hypot(dx, dy) > 4) {
+        hasMovedRef.current = true;
+      }
+      setPan({
+        x: panStartRef.current.x + dx,
+        y: panStartRef.current.y + dy,
+      });
+    };
+
+    const handleGlobalMouseUp = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+      }
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // Chỉ nút chuột trái
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    hasMovedRef.current = false;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = { ...panRef.current };
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      hasMovedRef.current = false;
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      panStartRef.current = { ...panRef.current };
+    } else if (e.touches.length === 2) {
+      // 2 ngón tay: Pinch zoom
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchStartRef.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+        dist,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isDraggingRef.current) {
+      const dx = e.touches[0].clientX - touchStartRef.current.x;
+      const dy = e.touches[0].clientY - touchStartRef.current.y;
+      if (!hasMovedRef.current && Math.hypot(dx, dy) > 5) {
+        hasMovedRef.current = true;
+      }
+      setPan({
+        x: panStartRef.current.x + dx,
+        y: panStartRef.current.y + dy,
+      });
+    } else if (e.touches.length === 2 && touchStartRef.current.dist) {
+      const newDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const scaleChange = newDist / touchStartRef.current.dist;
+      touchStartRef.current.dist = newDist;
+      setZoomLevel((prev) => Math.max(0.7, Math.min(4.5, Number((prev * scaleChange).toFixed(2)))));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  };
+
+  const handleZoomIn = () => setZoomLevel((prev) => Math.min(Number((prev + 0.3).toFixed(2)), 4.5));
+  const handleZoomOut = () => setZoomLevel((prev) => Math.max(Number((prev - 0.3).toFixed(2)), 0.7));
+  const handleResetZoom = () => {
+    setZoomLevel(1.2);
+    setPan({ x: 0, y: 0 });
+  };
 
   return (
     <div
@@ -38,89 +180,73 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
           : 'w-full h-full'
       }`}
     >
-      {/* Header bar: Minimal wireframe style + Zoom presets */}
+      {/* Header bar: Minimal wireframe style (Đã bỏ bộ tỷ lệ % theo yêu cầu) */}
       <div className="h-8 px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-black tracking-widest text-slate-800 uppercase">
             PROJECT PLAN
           </span>
           <span className="text-[10px] text-slate-500 font-bold hidden sm:inline">
-            (Bấm chọn khu vực &bull; Cuộn chuột / Zoom để phóng to)
+            (Kéo chuột để di chuyển &bull; Lăn chuột phóng to/thu nhỏ)
           </span>
         </div>
 
-        {/* Nút điều khiển Zoom và Preset tỷ lệ kích thước ảnh */}
-        <div className="flex items-center gap-1.5">
-          {/* Preset nhanh mức phóng to */}
-          <div className="hidden md:flex items-center bg-slate-200/70 p-0.5 rounded text-[10px] font-bold text-slate-700">
-            <button
-              onClick={() => setZoomLevel(1.0)}
-              className={`px-1.5 py-0.5 rounded transition ${
-                zoomLevel === 1.0 ? 'bg-white text-black shadow-xs' : 'hover:text-black'
-              }`}
-            >
-              100%
-            </button>
-            <button
-              onClick={() => setZoomLevel(1.25)}
-              className={`px-1.5 py-0.5 rounded transition ${
-                zoomLevel === 1.25 ? 'bg-white text-black shadow-xs' : 'hover:text-black'
-              }`}
-            >
-              125%
-            </button>
-            <button
-              onClick={() => setZoomLevel(1.5)}
-              className={`px-1.5 py-0.5 rounded transition ${
-                zoomLevel === 1.5 ? 'bg-white text-black shadow-xs' : 'hover:text-black'
-              }`}
-            >
-              150%
-            </button>
-          </div>
-
-          <div className="flex items-center gap-0.5 border-l border-slate-200 pl-1">
-            <button
-              onClick={handleZoomIn}
-              className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
-              title="Phóng to"
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleZoomOut}
-              className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
-              title="Thu nhỏ"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleResetZoom}
-              className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
-              title="Mặc định (1.2x)"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition ml-0.5"
-              title={isExpanded ? 'Thu nhỏ' : 'Toàn màn hình'}
-            >
-              {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-            </button>
-          </div>
+        {/* Nút điều khiển Zoom và Fullscreen */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleZoomIn}
+            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            title="Phóng to (hoặc lăn chuột lên)"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleZoomOut}
+            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            title="Thu nhỏ (hoặc lăn chuột xuống)"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleResetZoom}
+            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            title="Đặt lại vị trí & tỷ lệ mặc định"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+          <div className="h-3 w-px bg-slate-300 mx-0.5" />
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1 rounded text-slate-600 hover:text-black hover:bg-slate-200 transition"
+            title={isExpanded ? 'Thu nhỏ' : 'Toàn màn hình'}
+          >
+            {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
         </div>
       </div>
 
-      {/* Plan SVG Viewport: Tối ưu diện tích hiển thị tối đa, không lãng phí padding */}
-      <div className="relative flex-1 overflow-auto bg-slate-50 flex items-center justify-center p-0.5 select-none">
+      {/* Plan Viewport: Không dùng thanh cuộn, hỗ trợ kéo (drag pan) và lăn chuột (wheel zoom) */}
+      <div
+        ref={containerRef}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`relative flex-1 overflow-hidden bg-slate-100 flex items-center justify-center select-none ${
+          isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
+      >
         <div
-          className="relative w-full h-full flex items-center justify-center transition-transform duration-200 origin-center"
-          style={{ transform: `scale(${zoomLevel})` }}
+          className={`relative w-full h-full flex items-center justify-center origin-center ${
+            isDragging ? 'transition-none' : 'transition-transform duration-100 ease-out'
+          }`}
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoomLevel})`,
+          }}
         >
           <svg
             viewBox="0 0 1024 778"
-            className="w-full h-full drop-shadow-sm select-none"
+            className="w-full h-full drop-shadow-sm select-none pointer-events-auto"
             preserveAspectRatio="xMidYMid meet"
           >
             <defs>
@@ -162,7 +288,13 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
               return (
                 <g
                   key={zone.id}
-                  onClick={() => onSelectZone(zone)}
+                  onClick={(e) => {
+                    if (hasMovedRef.current) {
+                      e.stopPropagation();
+                      return;
+                    }
+                    onSelectZone(zone);
+                  }}
                   onMouseEnter={() => setHoveredZoneId(zone.id)}
                   onMouseLeave={() => setHoveredZoneId(null)}
                   className="cursor-pointer"
