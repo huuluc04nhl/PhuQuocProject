@@ -116,11 +116,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         markerRef.current = null;
       }
 
-      // Lấy danh sách căn hộ thuộc phân khu
-      const currentUnits = (units || []).filter((u) => u.zoneId === selectedZone.id);
-
-      // Vẽ từng khung căn hộ lên bản đồ với màu nổi bật theo trạng thái
-      currentUnits.forEach((unit) => {
+      // Luôn hiển thị TẤT CẢ căn hộ trên bản đồ theo yêu cầu
+      (units || []).forEach((unit) => {
         const isSelected = unit.id === selectedUnit.id;
         const colorConfig = STATUS_COLORS[unit.status] || STATUS_COLORS['Trống'];
 

@@ -424,13 +424,13 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
                     </text>
                   </g>
 
-                  {/* Tooltip khi hover phân khu */}
+                  {/* Tooltip khi hover phân khu: Viết lại chuẩn 'Bấm chọn khu Lumière', 'Bấm chọn khu Manhattan', 'Bấm chọn khu The Rivus' */}
                   {isHovered && !isSelected && (
                     <g pointerEvents="none">
                       <rect
-                        x={box.centerX - 75}
+                        x={box.centerX - 85}
                         y={box.y - 28}
-                        width="150"
+                        width="170"
                         height="24"
                         rx="4"
                         fill="#0f172a"
@@ -445,7 +445,7 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
                         textAnchor="middle"
                         fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont"
                       >
-                        Bấm chọn {zone.name.split(' ')[0]}
+                        Bấm chọn khu {zone.code === 'LUMIERE' ? 'Lumière' : zone.code === 'MANHATTAN' ? 'Manhattan' : zone.code === 'RIVUS' ? 'The Rivus' : zone.code}
                       </text>
                     </g>
                   )}
@@ -453,11 +453,10 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
               );
             })}
 
-            {/* Các căn hộ bên trong khu vực đang chọn với màu trạng thái nổi bật (Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê) */}
+            {/* Các căn hộ hiển thị với màu trạng thái nổi bật (Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê) */}
             {units.map((unit) => {
               const isInSelectedZone = unit.zoneId === selectedZone.id;
               const isSelectedUnit = unit.id === selectedUnit.id;
-              if (!isInSelectedZone) return null;
 
               const statusColor = unit.status === 'Trống'
                 ? '#10b981'
@@ -472,9 +471,9 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
                     y={unit.shape.y}
                     width={unit.shape.width}
                     height={unit.shape.height}
-                    fill={isSelectedUnit ? `${statusColor}80` : `${statusColor}50`}
+                    fill={isSelectedUnit ? `${statusColor}90` : isInSelectedZone ? `${statusColor}60` : `${statusColor}35`}
                     stroke={isSelectedUnit ? '#0f172a' : statusColor}
-                    strokeWidth={isSelectedUnit ? 3.5 : 2.5}
+                    strokeWidth={isSelectedUnit ? 3.5 : 2}
                     rx={1}
                   />
                   {isSelectedUnit && (
