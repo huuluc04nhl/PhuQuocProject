@@ -10,7 +10,7 @@ interface InteractiveMapProps {
   selectedUnit: Unit;
   units: Unit[];
   onSelectUnit: (unit: Unit) => void;
-  mobileView?: 'map' | 'plan' | 'split';
+  mobileView?: 'split' | 'map' | 'plan';
 }
 
 // Bảng màu trạng thái nổi bật theo yêu cầu:
@@ -42,131 +42,104 @@ const STATUS_COLORS: Record<UnitStatus, { stroke: string; strokeSelected: string
   },
 };
 
-// Cấu hình các nguồn bản đồ (Tile Providers) đáng tin cậy cao:
-// 1. CartoDB Voyager: CDN toàn cầu (Fastly), siêu nhanh tại VN, không bị chặn hay rate-limit như OSM gốc
-// 2. Esri Satellite: Ảnh vệ tinh thực tế sắc nét, quan sát rõ từng mái nhà & công viên
-// 3. OpenStreetMap: Lớp bản đồ gốc tiêu chuẩn
-const TILE_PROVIDERS = {
-  streets: {
-    name: 'Bản đồ số',
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    subdomains: 'abcd',
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  },
-  satellite: {
-    name: 'Vệ tinh',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    subdomains: '',
-    maxZoom: 19,
-    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-  },
-  osm: {
-    name: 'OSM Gốc',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    subdomains: 'abc',
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors',
-  },
-};
-
 export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   selectedZone,
   selectedUnit,
   units,
   onSelectUnit,
-  mobileView = 'split',
+  mobileView,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const tileLayerRef = useRef<any>(null);
   const layersGroupRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
-  const [activeTileType, setActiveTileType] = useState<'streets' | 'satellite' | 'osm'>('streets');
 
-  // Cập nhật lại kích thước bản đồ khi mở / đóng fullscreen hoặc khi mobileView thay đổi
+  // Cập nhật lại kích thước bản đồ khi mở / đóng fullscreen
   useEffect(() => {
-    const timer1 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 50);
-    const timer2 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 200);
-    const timer3 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 500);
+    const timer = setTimeout(() => {
+      mapInstanceRef.current?.invalidateSize();
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [isExpanded]);
+
+  // Cập nhật kích thước bản đồ tức thì khi đổi tab mobile (Bản đồ / Mặt bằng / Gộp)
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const t1 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 60);
+    const t2 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 220);
+    const t3 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 500);
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
-  }, [isExpanded, mobileView]);
+  }, [mobileView]);
 
-  // Cập nhật tile layer khi người dùng đổi chế độ xem bản đồ (Bản đồ số / Vệ tinh / OSM)
-  useEffect(() => {
-    if (!mapInstanceRef.current || !isMapReady) return;
-    import('leaflet').then((leafletModule) => {
-      const L = (leafletModule as any).default || leafletModule;
-      if (!L || !mapInstanceRef.current) return;
-
-      const provider = TILE_PROVIDERS[activeTileType];
-      if (tileLayerRef.current) {
-        tileLayerRef.current.remove();
-      }
-
-      const newTileLayer = L.tileLayer(provider.url, {
-        subdomains: provider.subdomains,
-        maxZoom: provider.maxZoom,
-        attribution: provider.attribution,
-        crossOrigin: true,
-      }).addTo(mapInstanceRef.current);
-
-      // Đẩy tile layer xuống dưới cùng để không che khuất polygon
-      newTileLayer.bringToBack();
-      tileLayerRef.current = newTileLayer;
-    });
-  }, [activeTileType, isMapReady]);
-
-  // 1. Khởi tạo bản đồ thực tế với cơ chế phòng ngừa lỗi trên máy khác
+  // 1. Khởi tạo bản đồ OpenStreetMap thực tế với Subdomains & Fallback CDN chống chặn mạng di động
   useEffect(() => {
     if (typeof window === 'undefined' || !mapContainerRef.current) return;
     if (isInitializedRef.current) return;
 
-    import('leaflet').then((leafletModule) => {
-      const L = (leafletModule as any).default || leafletModule;
-      if (!L || typeof L.map !== 'function' || !mapContainerRef.current || mapInstanceRef.current) return;
+    import('leaflet').then((L) => {
+      if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-      // Không tải icon qua unpkg.com từ xa để tránh bị AdBlock hoặc firewall chặn trên máy khác
-      try {
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
-      } catch (err) {
-        // bỏ qua nếu đã xóa
-      }
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      });
 
       const map = L.map(mapContainerRef.current, {
         center: [selectedUnit.mapCoords.lat, selectedUnit.mapCoords.lng],
         zoom: selectedZone.zoom || 17,
         zoomControl: false,
-        attributionControl: false, // Tối giản giao diện Kiosk
+        attributionControl: true,
       });
 
-      // Mặc định nạp CartoDB Voyager qua Fastly CDN toàn cầu
-      const provider = TILE_PROVIDERS.streets;
-      const tileLayer = L.tileLayer(provider.url, {
-        subdomains: provider.subdomains,
-        maxZoom: provider.maxZoom,
-        crossOrigin: true,
-      }).addTo(map);
+      // Layer bản đồ thực tế với subdomains phân tải a/b/c và fallback CDN tự động nếu nhà mạng di động chặn
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; OpenStreetMap contributors',
+      });
 
-      tileLayerRef.current = tileLayer;
+      // Chống lỗi màn hình xám trên mobile: Nếu tile OSM bị lỗi mạng/DNS 4G, tự động fallback sang CartoDB CDN
+      tileLayer.on('tileerror', (error: any) => {
+        if (error?.tile && !error.tile.src.includes('cartocdn')) {
+          const coords = error.coords;
+          if (coords) {
+            error.tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${coords.z}/${coords.x}/${coords.y}.png`;
+          }
+        }
+      });
+
+      tileLayer.addTo(map);
+
       const layersGroup = L.layerGroup().addTo(map);
       layersGroupRef.current = layersGroup;
       mapInstanceRef.current = map;
       isInitializedRef.current = true;
       setIsMapReady(true);
 
-      // Kích hoạt tính toán kích thước bản đồ ngay lập tức qua nhiều nhịp
-      const t1 = setTimeout(() => map.invalidateSize(), 100);
-      const t2 = setTimeout(() => map.invalidateSize(), 300);
-      const t3 = setTimeout(() => map.invalidateSize(), 700);
+      // Kích hoạt tính toán kích thước bản đồ nhiều đợt để đảm bảo hiển thị 100% trên cả mobile cấu hình thấp
+      const timers = [
+        setTimeout(() => map.invalidateSize(), 80),
+        setTimeout(() => map.invalidateSize(), 250),
+        setTimeout(() => map.invalidateSize(), 600),
+        setTimeout(() => map.invalidateSize(), 1200),
+      ];
+
+      // Lắng nghe sự kiện xoay màn hình (orientation) và thay đổi kích thước cửa sổ trên thiết bị di động
+      const handleMobileResize = () => {
+        map.invalidateSize();
+      };
+      window.addEventListener('resize', handleMobileResize);
+      window.addEventListener('orientationchange', handleMobileResize);
 
       // ResizeObserver tự động cập nhật khi khung chứa thay đổi kích thước trên mọi thiết bị
       if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
@@ -176,14 +149,6 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         ro.observe(mapContainerRef.current);
         resizeObserverRef.current = ro;
       }
-
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-      };
-    }).catch((err) => {
-      console.error('Không thể khởi tạo Leaflet:', err);
     });
 
     return () => {
@@ -204,10 +169,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   useEffect(() => {
     if (!isMapReady || !mapInstanceRef.current || !layersGroupRef.current) return;
 
-    import('leaflet').then((leafletModule) => {
-      const L = (leafletModule as any).default || leafletModule;
-      if (!L || !mapInstanceRef.current || !layersGroupRef.current) return;
-
+    import('leaflet').then((L) => {
       const map = mapInstanceRef.current;
       const layersGroup = layersGroupRef.current;
 
@@ -356,45 +318,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       </div>
 
       {/* Viewport 100% Bản đồ thực tế với các khung căn hộ nổi bật */}
-      <div className="relative flex-1 w-full min-h-0 bg-slate-100 overflow-hidden">
+      <div className="relative flex-1 w-full min-h-[220px] bg-slate-100 overflow-hidden">
         <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
-
-        {/* Nút chuyển đổi chế độ xem bản đồ: Bản đồ số / Vệ tinh / OSM Gốc */}
-        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 flex items-center bg-white/95 backdrop-blur-xs shadow-md rounded-lg border border-slate-200 overflow-hidden text-[10px] sm:text-xs font-bold p-0.5">
-          <button
-            onClick={() => setActiveTileType('streets')}
-            className={`px-2 py-1 rounded transition ${
-              activeTileType === 'streets'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-black hover:bg-slate-100'
-            }`}
-            title="Bản đồ số CartoDB tốc độ cao"
-          >
-            Bản đồ số
-          </button>
-          <button
-            onClick={() => setActiveTileType('satellite')}
-            className={`px-2 py-1 rounded transition ${
-              activeTileType === 'satellite'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-black hover:bg-slate-100'
-            }`}
-            title="Ảnh chụp vệ tinh thực tế Esri"
-          >
-            Vệ tinh
-          </button>
-          <button
-            onClick={() => setActiveTileType('osm')}
-            className={`px-2 py-1 rounded transition ${
-              activeTileType === 'osm'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-black hover:bg-slate-100'
-            }`}
-            title="Bản đồ OpenStreetMap tiêu chuẩn"
-          >
-            OSM
-          </button>
-        </div>
 
         {/* Minimal Zoom, Recenter, & Fullscreen Controls */}
         <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 flex flex-col bg-white shadow-md rounded border border-slate-200 overflow-hidden">

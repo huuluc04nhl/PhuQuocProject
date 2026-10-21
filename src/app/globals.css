@@ -38,16 +38,8 @@ body {
   width: 100% !important;
   height: 100% !important;
   background: #f8fafc !important;
-  z-index: 1;
-}
-
-.leaflet-pane {
-  z-index: 1 !important;
-}
-
-.leaflet-top,
-.leaflet-bottom {
-  z-index: 2 !important;
+  z-index: 0;
+  position: relative;
 }
 
 .leaflet-control-attribution {

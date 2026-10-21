@@ -123,7 +123,7 @@ export default function Home() {
           </div>
 
           {/* Vùng chứa Map & Project Plan */}
-          <div className="relative flex-1 w-full min-h-0 flex flex-col overflow-hidden">
+          <div className="relative flex-1 h-full w-full min-h-0 flex flex-col overflow-hidden">
             {/* KHỐI MAP (Nằm trên, chiếm 74% chiều cao cột trái ở desktop, toàn màn hình khi chọn tab Map trên mobile) */}
             <div
               className={`w-full border-2 border-slate-900 bg-white overflow-hidden shadow-xs transition-all duration-200 ${
@@ -131,7 +131,7 @@ export default function Home() {
                   ? 'h-full flex-1'
                   : mobileView === 'plan'
                   ? 'hidden lg:block lg:h-[74%]'
-                  : 'h-[68%] sm:h-[72%] lg:h-[74%]'
+                  : 'min-h-[240px] h-[68%] sm:h-[72%] lg:h-[74%]'
               }`}
             >
               <InteractiveMap
