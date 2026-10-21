@@ -124,8 +124,10 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
             preserveAspectRatio="xMidYMid meet"
           >
             <defs>
-              <filter id="zoneGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.4" />
+              {/* Filter tạo viền sáng rực rỡ nổi bật cho khung phân khu đang chọn */}
+              <filter id="activeZoneGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#2563eb" floodOpacity="0.75" />
+                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000000" floodOpacity="0.4" />
               </filter>
             </defs>
 
@@ -139,24 +141,11 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
               preserveAspectRatio="xMidYMid meet"
             />
 
-            {/* 2. CÁC PHÂN KHU (ZONES) ĐƯỢC ĐÓNG KHUNG TRÊN PROJECT PLAN */}
+            {/* 2. CÁC PHÂN KHU (ZONES) ĐƯỢC ĐÓNG KHUNG TRÊN PROJECT PLAN VỚI BORDER CỰC KỲ NỔI BẬT */}
             {zones.map((zone) => {
               const isSelected = zone.id === selectedZone.id;
               const isHovered = hoveredZoneId === zone.id;
               const box = zone.box;
-
-              const strokeColor = isSelected
-                ? '#0f172a'
-                : isHovered
-                ? '#0284c7'
-                : 'rgba(15, 23, 42, 0.4)';
-              const strokeWidth = isSelected ? 4 : isHovered ? 2.5 : 1.5;
-              const strokeDasharray = isHovered && !isSelected ? '6 4' : undefined;
-              const fillColor = isSelected
-                ? 'rgba(15, 23, 42, 0.16)'
-                : isHovered
-                ? 'rgba(2, 132, 199, 0.12)'
-                : 'rgba(15, 23, 42, 0.02)';
 
               return (
                 <g
@@ -167,32 +156,86 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
                   className="cursor-pointer"
                   style={{ pointerEvents: 'all' }}
                 >
-                  {/* Khung bao quát phân khu */}
+                  {/* Nếu đang được chọn: Vẽ lớp viền trắng tương phản bên dưới để border luôn nổi bần bật trên mọi nền màu */}
+                  {isSelected && (
+                    <rect
+                      x={box.x - 2}
+                      y={box.y - 2}
+                      width={box.width + 4}
+                      height={box.height + 4}
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth={7}
+                      rx={5}
+                      className="pointer-events-none"
+                    />
+                  )}
+
+                  {/* Khung viền chính của phân khu: Màu xanh dương Electric Blue rực rỡ khi chọn */}
                   <rect
                     x={box.x}
                     y={box.y}
                     width={box.width}
                     height={box.height}
-                    fill={fillColor}
-                    stroke={strokeColor}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={strokeDasharray}
+                    fill={
+                      isSelected
+                        ? 'rgba(37, 99, 235, 0.16)'
+                        : isHovered
+                        ? 'rgba(2, 132, 199, 0.15)'
+                        : 'rgba(15, 23, 42, 0.03)'
+                    }
+                    stroke={
+                      isSelected
+                        ? '#2563eb' // Xanh dương hoàng gia cực nổi bật
+                        : isHovered
+                        ? '#0284c7'
+                        : 'rgba(15, 23, 42, 0.45)'
+                    }
+                    strokeWidth={isSelected ? 4.5 : isHovered ? 3 : 1.8}
+                    strokeDasharray={isHovered && !isSelected ? '6 4' : undefined}
                     rx={3}
-                    filter={isSelected ? 'url(#zoneGlow)' : undefined}
-                    className="transition-colors duration-150"
+                    filter={isSelected ? 'url(#activeZoneGlow)' : undefined}
+                    className="transition-all duration-200"
                   />
 
-                  {/* 4 Góc Viewfinder sắc nét khi phân khu được chọn */}
+                  {/* 4 Góc Viewfinder sắc nét viền kép nổi bật khi phân khu được chọn */}
                   {isSelected && (
-                    <g stroke="#0f172a" strokeWidth="3" fill="none" strokeLinecap="square">
+                    <g stroke="#2563eb" strokeWidth="4" fill="none" strokeLinecap="square">
                       {/* Top-Left */}
-                      <path d={`M ${box.x - 3} ${box.y + 10} L ${box.x - 3} ${box.y - 3} L ${box.x + 10} ${box.y - 3}`} />
+                      <path d={`M ${box.x - 5} ${box.y + 14} L ${box.x - 5} ${box.y - 5} L ${box.x + 14} ${box.y - 5}`} />
                       {/* Top-Right */}
-                      <path d={`M ${box.x + box.width - 10} ${box.y - 3} L ${box.x + box.width + 3} ${box.y - 3} L ${box.x + box.width + 3} ${box.y + 10}`} />
+                      <path d={`M ${box.x + box.width - 14} ${box.y - 5} L ${box.x + box.width + 5} ${box.y - 5} L ${box.x + box.width + 5} ${box.y + 14}`} />
                       {/* Bottom-Left */}
-                      <path d={`M ${box.x - 3} ${box.y + box.height - 10} L ${box.x - 3} ${box.y + box.height + 3} L ${box.x + 10} ${box.y + box.height + 3}`} />
+                      <path d={`M ${box.x - 5} ${box.y + box.height - 14} L ${box.x - 5} ${box.y + box.height + 5} L ${box.x + 14} ${box.y + box.height + 5}`} />
                       {/* Bottom-Right */}
-                      <path d={`M ${box.x + box.width - 10} ${box.y + box.height + 3} L ${box.x + box.width + 3} ${box.y + box.height + 3} L ${box.x + box.width + 3} ${box.y + box.height - 10}`} />
+                      <path d={`M ${box.x + box.width - 14} ${box.y + box.height + 5} L ${box.x + box.width + 5} ${box.y + box.height + 5} L ${box.x + box.width + 5} ${box.y + box.height - 14}`} />
+                    </g>
+                  )}
+
+                  {/* Huy hiệu phân khu nổi bật gắn trên góc khung */}
+                  {isSelected && (
+                    <g pointerEvents="none" className="transition-opacity">
+                      <rect
+                        x={box.x}
+                        y={box.y - 20}
+                        width={Math.min(box.width, 160)}
+                        height="18"
+                        rx="3"
+                        fill="#2563eb"
+                        filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))"
+                      />
+                      <text
+                        x={box.x + Math.min(box.width, 160) / 2}
+                        y={box.y - 7}
+                        fill="#ffffff"
+                        fontSize="9"
+                        fontWeight="900"
+                        letterSpacing="0.5"
+                        textAnchor="middle"
+                        fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont"
+                      >
+                        {zone.code} &bull; ĐANG CHỌN
+                      </text>
                     </g>
                   )}
 
