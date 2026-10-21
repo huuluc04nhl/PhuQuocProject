@@ -42,46 +42,41 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
   panRef.current = pan;
   zoomRef.current = zoomLevel;
 
-  // Hàm giới hạn toạ độ kéo (Boundary clamping) để mặt bằng không bị kéo văng ra ngoài khung hình
-  const clampPan = useCallback((nextX: number, nextY: number, zoom: number): { x: number; y: number } => {
-    const container = containerRef.current;
-    if (!container) return { x: nextX, y: nextY };
+  // Hàm giới hạn di chuyển (pan) để ảnh không bao giờ bị kéo tuột ra ngoài,
+  // chỉ cho phép kéo trong giới hạn của bức ảnh (bounding limits)
+  const clampPan = (x: number, y: number, zoom: number, container: HTMLElement | null) => {
+    if (!container) return { x, y };
+    const W = container.clientWidth;
+    const H = container.clientHeight;
+    if (!W || !H) return { x, y };
 
-    const W = container.clientWidth || 800;
-    const H = container.clientHeight || 400;
-
-    // Tỷ lệ ảnh SVG gốc 1024 x 778
-    const svgRatio = 1024 / 778;
+    const imageRatio = 1024 / 778;
     const containerRatio = W / H;
-
     let baseW = W;
     let baseH = H;
-    if (containerRatio > svgRatio) {
+    if (containerRatio > imageRatio) {
       baseH = H;
-      baseW = H * svgRatio;
+      baseW = H * imageRatio;
     } else {
       baseW = W;
-      baseH = W / svgRatio;
+      baseH = W / imageRatio;
     }
 
-    const currentW = baseW * zoom;
-    const currentH = baseH * zoom;
+    const curW = baseW * zoom;
+    const curH = baseH * zoom;
 
-    // Giới hạn: cho phép kéo tới sát mọi góc mép của ảnh + một khoảng đệm an toàn (~15% khung hình)
-    // Đảm bảo không bao giờ bị kéo mất mặt bằng ra ngoài khoảng trắng vô tận
-    const marginX = Math.min(W * 0.18, 90);
-    const marginY = Math.min(H * 0.18, 70);
+    // Giới hạn trục ngang: Không bao giờ cho phép mép ảnh vượt qua mép container
+    const maxPanX = Math.abs(curW - W) / 2;
+    const clampedX = Math.max(-maxPanX, Math.min(maxPanX, x));
 
-    const maxPanX = Math.max(0, (currentW - W) / 2) + marginX;
-    const maxPanY = Math.max(0, (currentH - H) / 2) + marginY;
+    // Giới hạn trục dọc: Không bao giờ cho phép mép ảnh vượt qua mép container
+    const maxPanY = Math.abs(curH - H) / 2;
+    const clampedY = Math.max(-maxPanY, Math.min(maxPanY, y));
 
-    return {
-      x: Math.max(-maxPanX, Math.min(maxPanX, nextX)),
-      y: Math.max(-maxPanY, Math.min(maxPanY, nextY)),
-    };
-  }, []);
+    return { x: clampedX, y: clampedY };
+  };
 
-  // Lăn chuột phóng to / thu nhỏ tại vị trí con trỏ chuột có giới hạn khung hình
+  // Lăn chuột phóng to / thu nhỏ tại vị trí con trỏ chuột, luôn kẹp chặt trong giới hạn ảnh
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -94,19 +89,18 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
 
       const zoomFactor = e.deltaY < 0 ? 1.18 : 0.85;
       const currentZoom = zoomRef.current;
-      const nextZoom = Math.max(0.7, Math.min(4.5, Number((currentZoom * zoomFactor).toFixed(3))));
+      const nextZoom = Math.max(1.0, Math.min(4.5, Number((currentZoom * zoomFactor).toFixed(3))));
 
       if (nextZoom === currentZoom) return;
 
       const actualFactor = nextZoom / currentZoom;
       const currentPan = panRef.current;
 
-      // Giữ điểm dưới con trỏ chuột đứng yên khi phóng to / thu nhỏ + giới hạn biên
-      const rawX = mouseX - (mouseX - currentPan.x) * actualFactor;
-      const rawY = mouseY - (mouseY - currentPan.y) * actualFactor;
-      const boundedPan = clampPan(rawX, rawY, nextZoom);
+      const targetX = mouseX - (mouseX - currentPan.x) * actualFactor;
+      const targetY = mouseY - (mouseY - currentPan.y) * actualFactor;
+      const clampedPan = clampPan(targetX, targetY, nextZoom, container);
 
-      setPan(boundedPan);
+      setPan(clampedPan);
       setZoomLevel(nextZoom);
     };
 
@@ -114,9 +108,9 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
     return () => {
       container.removeEventListener('wheel', onWheel);
     };
-  }, [clampPan]);
+  }, []);
 
-  // Xử lý kéo thả toàn màn hình có giới hạn khung nhìn
+  // Xử lý kéo thả toàn màn hình (chặn kéo ra ngoài phạm vi bức ảnh)
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
@@ -125,9 +119,13 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
       if (!hasMovedRef.current && Math.hypot(dx, dy) > 4) {
         hasMovedRef.current = true;
       }
-      const rawX = panStartRef.current.x + dx;
-      const rawY = panStartRef.current.y + dy;
-      setPan(clampPan(rawX, rawY, zoomRef.current));
+      const nextPan = clampPan(
+        panStartRef.current.x + dx,
+        panStartRef.current.y + dy,
+        zoomRef.current,
+        containerRef.current
+      );
+      setPan(nextPan);
     };
 
     const handleGlobalMouseUp = () => {
@@ -143,7 +141,23 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [clampPan]);
+  }, []);
+
+  // Đảm bảo khi resize trình duyệt hoặc mở rộng toàn màn hình thì pan luôn nằm trong giới hạn
+  useEffect(() => {
+    const handleResize = () => {
+      setPan((curPan) => clampPan(curPan.x, curPan.y, zoomRef.current, containerRef.current));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPan((curPan) => clampPan(curPan.x, curPan.y, zoomRef.current, containerRef.current));
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [isExpanded]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Chỉ nút chuột trái
@@ -184,9 +198,13 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
       if (!hasMovedRef.current && Math.hypot(dx, dy) > 5) {
         hasMovedRef.current = true;
       }
-      const rawX = panStartRef.current.x + dx;
-      const rawY = panStartRef.current.y + dy;
-      setPan(clampPan(rawX, rawY, zoomRef.current));
+      const nextPan = clampPan(
+        panStartRef.current.x + dx,
+        panStartRef.current.y + dy,
+        zoomRef.current,
+        containerRef.current
+      );
+      setPan(nextPan);
     } else if (e.touches.length === 2 && touchStartRef.current.dist) {
       const newDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -194,9 +212,9 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
       );
       const scaleChange = newDist / touchStartRef.current.dist;
       touchStartRef.current.dist = newDist;
-      const nextZoom = Math.max(0.7, Math.min(4.5, Number((zoomRef.current * scaleChange).toFixed(2))));
+      const nextZoom = Math.max(1.0, Math.min(4.5, Number((zoomRef.current * scaleChange).toFixed(2))));
+      setPan((curPan) => clampPan(curPan.x, curPan.y, nextZoom, containerRef.current));
       setZoomLevel(nextZoom);
-      setPan((prev) => clampPan(prev.x, prev.y, nextZoom));
     }
   };
 
@@ -206,15 +224,21 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
   };
 
   const handleZoomIn = () => {
-    const next = Math.min(Number((zoomRef.current + 0.3).toFixed(2)), 4.5);
-    setZoomLevel(next);
-    setPan((prev) => clampPan(prev.x, prev.y, next));
+    setZoomLevel((prev) => {
+      const next = Math.min(Number((prev + 0.3).toFixed(2)), 4.5);
+      setPan((curPan) => clampPan(curPan.x, curPan.y, next, containerRef.current));
+      return next;
+    });
   };
+
   const handleZoomOut = () => {
-    const next = Math.max(Number((zoomRef.current - 0.3).toFixed(2)), 0.7);
-    setZoomLevel(next);
-    setPan((prev) => clampPan(prev.x, prev.y, next));
+    setZoomLevel((prev) => {
+      const next = Math.max(Number((prev - 0.3).toFixed(2)), 1.0);
+      setPan((curPan) => clampPan(curPan.x, curPan.y, next, containerRef.current));
+      return next;
+    });
   };
+
   const handleResetZoom = () => {
     setZoomLevel(1.2);
     setPan({ x: 0, y: 0 });
