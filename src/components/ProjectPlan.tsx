@@ -248,18 +248,18 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
     <div
       className={`relative bg-white overflow-hidden flex flex-col transition-all duration-300 ${
         isExpanded
-          ? 'fixed inset-4 z-50 shadow-2xl border-2 border-slate-900 bg-white'
+          ? 'fixed inset-2 sm:inset-4 z-50 shadow-2xl border-2 border-slate-900 bg-white'
           : 'w-full h-full'
       }`}
     >
       {/* Header bar: Minimal wireframe style (Đã bỏ bộ tỷ lệ % theo yêu cầu) */}
-      <div className="h-8 px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-black tracking-widest text-slate-800 uppercase">
+      <div className="h-8 px-2 sm:px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="text-[10px] sm:text-[11px] font-black tracking-widest text-slate-800 uppercase">
             PROJECT PLAN
           </span>
-          <span className="text-[10px] text-slate-500 font-bold hidden sm:inline">
-            (Kéo chuột để di chuyển &bull; Lăn chuột phóng to/thu nhỏ)
+          <span className="text-[9px] sm:text-[10px] text-slate-500 font-bold hidden sm:inline">
+            (Kéo chuột &bull; Lăn zoom)
           </span>
         </div>
 

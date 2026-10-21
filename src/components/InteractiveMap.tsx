@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Unit, Zone, UnitStatus } from '@/types/unit';
-import { ZoomIn, ZoomOut, Navigation } from 'lucide-react';
+import { ZoomIn, ZoomOut, Navigation, Maximize2, Minimize2 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 interface InteractiveMapProps {
@@ -52,6 +52,15 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const layersGroupRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const isInitializedRef = useRef<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  // Cập nhật lại kích thước bản đồ khi mở / đóng fullscreen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      mapInstanceRef.current?.invalidateSize();
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [isExpanded]);
 
   // 1. Khởi tạo bản đồ OpenStreetMap thực tế
   useEffect(() => {
@@ -206,11 +215,17 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full bg-slate-100 overflow-hidden select-none flex flex-col">
+    <div
+      className={`bg-slate-100 overflow-hidden select-none flex flex-col transition-all duration-300 ${
+        isExpanded
+          ? 'fixed inset-2 sm:inset-4 z-50 shadow-2xl border-2 border-slate-900 bg-white'
+          : 'relative w-full h-full'
+      }`}
+    >
       {/* Header bar của MAP: Tối giản + BẢNG CHÚ THÍCH MÀU NỔI BẬT */}
-      <div className="h-8 px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-black tracking-widest text-slate-800 uppercase">
+      <div className="h-8 px-2 sm:px-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 z-10 select-none">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="text-[10px] sm:text-[11px] font-black tracking-widest text-slate-800 uppercase">
             MAP
           </span>
           <span className="text-[10px] text-slate-500 font-bold hidden md:inline">
@@ -219,17 +234,17 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         </div>
 
         {/* Chú thích màu trực quan: Xanh = Trống, Vàng = Đang xem, Đỏ = Đã thuê */}
-        <div className="flex items-center gap-3 bg-white px-2.5 py-0.5 rounded-full border border-slate-200 shadow-xs text-[10px] font-bold">
+        <div className="flex items-center gap-1.5 sm:gap-3 bg-white px-2 sm:px-2.5 py-0.5 rounded-full border border-slate-200 shadow-xs text-[9px] sm:text-[10px] font-bold">
           <span className="flex items-center gap-1 text-emerald-700">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-emerald-600 inline-block shadow-xs"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-500 border border-emerald-600 inline-block shadow-xs"></span>
             Trống
           </span>
           <span className="flex items-center gap-1 text-amber-700">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-500 inline-block shadow-xs"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-amber-400 border border-amber-500 inline-block shadow-xs"></span>
             Đang xem
           </span>
           <span className="flex items-center gap-1 text-rose-700">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-rose-600 inline-block shadow-xs"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-rose-500 border border-rose-600 inline-block shadow-xs"></span>
             Đã thuê
           </span>
         </div>
@@ -239,28 +254,39 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       <div className="relative flex-1 w-full h-full bg-slate-100 overflow-hidden">
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-        {/* Minimal Zoom & Recenter Controls */}
-        <div className="absolute top-3 right-3 z-10 flex flex-col bg-white shadow-md rounded overflow-hidden">
+        {/* Minimal Zoom, Recenter, & Fullscreen Controls */}
+        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 flex flex-col bg-white shadow-md rounded border border-slate-200 overflow-hidden">
           <button
             onClick={handleZoomIn}
             className="p-1.5 text-slate-700 hover:bg-slate-100 transition"
             title="Phóng to"
           >
-            <ZoomIn className="w-4 h-4" />
+            <ZoomIn className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </button>
           <button
             onClick={handleZoomOut}
             className="p-1.5 text-slate-700 hover:bg-slate-100 transition border-t border-slate-200"
             title="Thu nhỏ"
           >
-            <ZoomOut className="w-4 h-4" />
+            <ZoomOut className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </button>
           <button
             onClick={handleResetCenter}
             className="p-1.5 text-slate-900 hover:bg-slate-100 transition border-t border-slate-200"
             title="Đến vị trí căn"
           >
-            <Navigation className="w-4 h-4" />
+            <Navigation className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+          </button>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 text-slate-900 hover:bg-slate-100 transition border-t border-slate-200"
+            title={isExpanded ? 'Thu nhỏ bản đồ' : 'Toàn màn hình bản đồ'}
+          >
+            {isExpanded ? (
+              <Minimize2 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+            ) : (
+              <Maximize2 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+            )}
           </button>
         </div>
       </div>

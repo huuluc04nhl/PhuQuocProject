@@ -9,7 +9,7 @@ interface UnitInfoProps {
 
 export const UnitInfo: React.FC<UnitInfoProps> = ({ unit }) => {
   return (
-    <div className="flex-1 bg-white p-5 flex flex-col justify-between overflow-y-auto">
+    <div className="flex-1 bg-white p-4 sm:p-5 flex flex-col justify-between overflow-y-auto">
       <div>
         {/* Title & Name */}
         <div className="pb-3 border-b border-slate-100">
