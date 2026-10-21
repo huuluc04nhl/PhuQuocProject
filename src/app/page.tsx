@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DEMO_UNITS, DEMO_ZONES } from '@/data/units';
 import { Unit, Zone } from '@/types/unit';
 import { Header } from '@/components/Header';
@@ -19,8 +19,6 @@ export default function Home() {
   const [selectedUnit, setSelectedUnit] = useState<Unit>(DEMO_UNITS[0]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
-
-
 
   // 1. Khi chọn phân khu được đóng khung ở PROJECT PLAN
   const handleSelectZone = (zone: Zone) => {
@@ -61,16 +59,16 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-white text-slate-900 overflow-hidden font-sans select-none border border-slate-900">
+    <div className="flex flex-col h-screen w-screen bg-white text-slate-900 overflow-hidden font-sans select-none border-2 border-slate-900">
       {/* 1. Header (Logo & Single Horizontal Divider Line - Chuẩn wireframe) */}
       <Header />
 
-      {/* 2. Main Body: Layout chuẩn Wireframe với PROJECT PLAN CHỒNG LÊN MAP */}
+      {/* 2. Main Body: Layout chuẩn Wireframe với PROJECT PLAN THU GỌN VÀ CHỒNG LÊN MAP */}
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 overflow-hidden min-h-0 bg-white">
         {/* CỘT TRÁI: MAP & PROJECT PLAN CHỒNG LÊN NHAU ĐÚNG BẢN VẼ WIREFRAME */}
-        <section className="lg:col-span-7 xl:col-span-8 relative h-full overflow-hidden">
-          {/* KHỐI MAP (Nằm trên, mở rộng xuống theo wireframe) */}
-          <div className="w-full h-[70%] border border-slate-900 bg-white overflow-hidden shadow-xs">
+        <section className="lg:col-span-7 xl:col-span-8 relative h-full overflow-hidden flex flex-col">
+          {/* KHỐI MAP (Nằm trên, chiếm 74% chiều cao cột trái, góc dưới lộ ra hai bên) */}
+          <div className="w-full h-[74%] border-2 border-slate-900 bg-white overflow-hidden shadow-xs">
             <InteractiveMap
               selectedZone={selectedZone}
               selectedUnit={selectedUnit}
@@ -79,8 +77,8 @@ export default function Home() {
             />
           </div>
 
-          {/* KHỐI PROJECT PLAN (CHỒNG LÊN PHẦN DƯỚI CỦA MAP - RỘNG ~78% VÀ NẰM LỆCH TRÁI CHUẨN WIREFRAME) */}
-          <div className="absolute bottom-0 left-[4%] w-[78%] h-[50%] border-2 border-slate-900 bg-white shadow-2xl z-20 overflow-hidden flex flex-col">
+          {/* KHỐI PROJECT PLAN (THU GỌN LẠI 1 XÍU, NẰM GỌN GÀNG ĐÚNG WIREFRAME) */}
+          <div className="absolute bottom-0 left-[8%] right-[8%] h-[46%] border-2 border-slate-900 bg-white shadow-2xl z-20 overflow-hidden flex flex-col">
             <ProjectPlan
               zones={zones}
               selectedZone={selectedZone}
@@ -95,12 +93,12 @@ export default function Home() {
         {/* CỘT PHẢI: VIDEO / IMAGE, INFO, VÀ BUTTONS (Đúng 3 khối riêng biệt của wireframe) */}
         <section className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4 h-full overflow-hidden">
           {/* KHỐI 1: VIDEO / IMAGE (Khung bo góc tròn lớn rounded-3xl đúng wireframe) */}
-          <div className="shrink-0 h-[29%] min-h-[170px] border border-slate-900 rounded-3xl overflow-hidden shadow-xs bg-black">
+          <div className="shrink-0 h-[30%] min-h-[170px] border-2 border-slate-900 rounded-3xl overflow-hidden shadow-xs bg-black">
             <MediaShowcase unit={selectedUnit} />
           </div>
 
           {/* KHỐI 2: INFO (Khung chữ nhật sắc nét đúng wireframe) */}
-          <div className="flex-1 min-h-0 border border-slate-900 overflow-hidden flex flex-col bg-white shadow-xs">
+          <div className="flex-1 min-h-0 border-2 border-slate-900 overflow-hidden flex flex-col bg-white shadow-xs">
             <UnitInfo unit={selectedUnit} />
           </div>
 
@@ -118,7 +116,7 @@ export default function Home() {
       </main>
 
       {/* 3. Footer Line chuẩn wireframe */}
-      <footer className="h-3 border-t border-slate-900 shrink-0 bg-white" />
+      <footer className="h-3 border-t-2 border-slate-900 shrink-0 bg-white" />
 
       {/* Modals */}
       <BookingModal

@@ -4,7 +4,7 @@ import React from 'react';
 
 export const Header: React.FC = () => {
   return (
-    <header className="h-14 px-6 bg-white border-b border-slate-900 flex items-center justify-between shrink-0 z-30">
+    <header className="h-14 px-6 bg-white border-b-2 border-slate-900 flex items-center justify-between shrink-0 z-30">
       {/* Exact Logo matching wireframe */}
       <div className="flex items-center gap-4">
         <span className="text-xl font-black tracking-tight text-slate-900 uppercase">

@@ -45,7 +45,7 @@ export const MediaShowcase: React.FC<MediaShowcaseProps> = ({ unit }) => {
   };
 
   return (
-    <div className="relative w-full h-[220px] sm:h-[250px] bg-black rounded-3xl overflow-hidden flex flex-col group select-none shadow-sm">
+    <div className="relative w-full h-full bg-black rounded-3xl overflow-hidden flex flex-col group select-none shadow-sm">
       {/* Top minimal switcher */}
       <div className="absolute top-2.5 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-1 bg-black/60 backdrop-blur-sm p-1 rounded-xl pointer-events-auto text-[11px] font-bold text-white">

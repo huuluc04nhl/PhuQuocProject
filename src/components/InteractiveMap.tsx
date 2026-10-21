@@ -85,14 +85,6 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       layersGroupRef.current = layersGroup;
       mapInstanceRef.current = map;
       isInitializedRef.current = true;
-
-      // Đảm bảo map luôn hiển thị đầy đủ gạch bản đồ khi container mở rộng
-      const resizeObserver = new ResizeObserver(() => {
-        map.invalidateSize();
-      });
-      if (mapContainerRef.current) {
-        resizeObserver.observe(mapContainerRef.current);
-      }
     });
 
     return () => {

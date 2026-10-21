@@ -27,7 +27,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {/* BOOKING BUTTON - Clean rounded wireframe style */}
       <button
         onClick={onOpenBooking}
-        className="rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-sm tracking-wider uppercase flex items-center justify-center transition-all shadow-sm active:scale-98"
+        className="rounded-xl border-2 border-slate-900 bg-slate-900 hover:bg-black text-white font-bold text-sm tracking-wider uppercase flex items-center justify-center transition-all shadow-sm active:scale-98"
       >
         BOOKING
       </button>
@@ -35,7 +35,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {/* CONTACT BUTTON - Clean rounded wireframe style */}
       <button
         onClick={onOpenContact}
-        className="rounded-xl border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-sm tracking-wider uppercase flex items-center justify-center transition-all shadow-sm active:scale-98"
+        className="rounded-xl border-2 border-slate-900 bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm tracking-wider uppercase flex items-center justify-center transition-all shadow-sm active:scale-98"
       >
         CONTACT
       </button>
