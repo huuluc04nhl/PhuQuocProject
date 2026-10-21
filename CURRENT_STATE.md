@@ -19,6 +19,7 @@
 | **Quy trình Chọn Khu & Đóng Khung Căn Hộ** | ✅ Hoàn thành | Click chọn phân khu ở Project Plan -> Phân khu được đóng khung bao quát trên master plan -> Bản đồ MAP tự động flyTo đến khu vực đó -> Trên MAP hiển thị trực tiếp các khung chữ nhật căn hộ (tòa tháp & dãy nhà trắng nhỏ) để click xem chi tiết |
 | **Dữ liệu Demo 6 Căn hộ chuẩn** | ✅ Hoàn thành | Đúng chuẩn: 2 căn Trống, 2 căn Đang xem (bao gồm căn nhà trắng `LK-08` dãy liền kề cạnh Lumière), 2 căn Đã cho thuê |
 | **Ẩn/Hiện Nút Theo Trạng Thái Thuê** | ✅ Hoàn thành | Đã ẩn hoàn toàn 2 nút khi căn đã cho thuê; hiển thị đầy đủ khi căn trống / đang xem đúng yêu cầu |
+| **Responsive Cho Mobile & Tablet** | ✅ Hoàn thành | Tối ưu hiển thị đa thiết bị từ Mobile (< 768px), Tablet (768px - 1024px) đến Kiosk 86" (1024px+): Cho phép cuộn dọc mượt mà trên mobile/tablet, tích hợp nút Toàn màn hình (Fullscreen) cho cả Map và Project Plan, header/padding/modal tự động co giãn thông minh không bị tràn màn hình |
 
 ---
 
