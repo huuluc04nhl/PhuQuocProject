@@ -20,26 +20,7 @@ export default function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
-  // Tính toán chiều rộng ProjectPlan tự động vừa khít theo tỷ lệ ảnh 1024x778 (không thừa viền 2 bên)
-  const planCardRef = useRef<HTMLDivElement>(null);
-  const [planCardWidth, setPlanCardWidth] = useState<number | undefined>(undefined);
 
-  useEffect(() => {
-    const updatePlanWidth = () => {
-      if (!planCardRef.current) return;
-      const h = planCardRef.current.clientHeight;
-      if (h > 32) {
-        // Trừ 32px của header bar, phần viewport còn lại nhân tỷ lệ gốc 1024/778
-        const viewportH = h - 32;
-        const exactW = Math.round(viewportH * (1024 / 778));
-        setPlanCardWidth(exactW);
-      }
-    };
-
-    updatePlanWidth();
-    window.addEventListener('resize', updatePlanWidth);
-    return () => window.removeEventListener('resize', updatePlanWidth);
-  }, []);
 
   // 1. Khi chọn phân khu được đóng khung ở PROJECT PLAN
   const handleSelectZone = (zone: Zone) => {
@@ -88,8 +69,8 @@ export default function Home() {
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 overflow-hidden min-h-0 bg-white">
         {/* CỘT TRÁI: MAP & PROJECT PLAN CHỒNG LÊN NHAU ĐÚNG BẢN VẼ WIREFRAME */}
         <section className="lg:col-span-7 xl:col-span-8 relative h-full overflow-hidden">
-          {/* KHỐI MAP (Nằm trên, mở rộng xuống thêm h-[72%] theo yêu cầu) */}
-          <div className="w-full h-[72%] border border-slate-900 bg-white overflow-hidden shadow-xs">
+          {/* KHỐI MAP (Nằm trên, mở rộng xuống theo wireframe) */}
+          <div className="w-full h-[70%] border border-slate-900 bg-white overflow-hidden shadow-xs">
             <InteractiveMap
               selectedZone={selectedZone}
               selectedUnit={selectedUnit}
@@ -98,15 +79,8 @@ export default function Home() {
             />
           </div>
 
-          {/* KHỐI PROJECT PLAN (CHỒNG LÊN PHẦN DƯỚI CỦA MAP - THU GỌN VỪA KHÍT THEO KÍCH THƯỚC ẢNH) */}
-          <div
-            ref={planCardRef}
-            style={{
-              width: planCardWidth ? `${planCardWidth}px` : undefined,
-              aspectRatio: planCardWidth ? undefined : '1024 / 850',
-            }}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[46%] max-w-[94%] border-2 border-slate-900 bg-white shadow-2xl z-20 overflow-hidden flex flex-col"
-          >
+          {/* KHỐI PROJECT PLAN (CHỒNG LÊN PHẦN DƯỚI CỦA MAP - RỘNG ~78% VÀ NẰM LỆCH TRÁI CHUẨN WIREFRAME) */}
+          <div className="absolute bottom-0 left-[4%] w-[78%] h-[50%] border-2 border-slate-900 bg-white shadow-2xl z-20 overflow-hidden flex flex-col">
             <ProjectPlan
               zones={zones}
               selectedZone={selectedZone}

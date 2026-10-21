@@ -21,8 +21,8 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
   units,
   onSelectUnit,
 }) => {
-  // Quản lý Pan (vị trí kéo x, y) và Zoom (độ phóng đại: mặc định 1.0x để phủ trọn vẹn khung hình)
-  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
+  // Quản lý Pan (vị trí kéo x, y) và Zoom (độ phóng đại: mặc định 1.15x để ảnh to rõ nét, phủ đầy khung hình)
+  const [zoomLevel, setZoomLevel] = useState<number>(1.15);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [hoveredZoneId, setHoveredZoneId] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const panRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const zoomRef = useRef<number>(1.0);
+  const zoomRef = useRef<number>(1.15);
   const hasMovedRef = useRef<boolean>(false);
   const touchStartRef = useRef<{ x: number; y: number; dist?: number }>({ x: 0, y: 0 });
 
@@ -240,7 +240,7 @@ export const ProjectPlan: React.FC<ProjectPlanProps> = ({
   };
 
   const handleResetZoom = () => {
-    setZoomLevel(1.0);
+    setZoomLevel(1.15);
     setPan({ x: 0, y: 0 });
   };
 
