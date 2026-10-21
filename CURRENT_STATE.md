@@ -12,6 +12,7 @@
 | **Workspace Setup** | ✅ Hoàn thành | Đã khởi tạo thư mục và cấu trúc quản lý dự án |
 | **Hệ thống AI Skills (.agents)** | ✅ Hoàn thành | Đã cài đặt 5 bộ skills: Ponytail, Graphify, Taste-Skill, UI/UX Pro Max, Caveman |
 | **Tài liệu kiểm soát dự án** | ✅ Hoàn thành | Đã tạo [`CODEBASE.md`](file:///d:/ThucTap2/PhuQuocRental/CODEBASE.md) & [`CURRENT_STATE.md`](file:///d:/ThucTap2/PhuQuocRental/CURRENT_STATE.md) |
+| **Đẩy Code Lên GitHub Repository** | ✅ Hoàn thành | Đã khởi tạo Git, commit toàn bộ mã nguồn sạch sẽ và push thành công lên repository [`huuluc04nhl/PhuQuocProject`](https://github.com/huuluc04nhl/PhuQuocProject) trên nhánh `main` |
 | **Phóng To & Tối Ưu Mặt Bằng Project Plan** | ✅ Hoàn thành | Đã mở rộng diện tích khung chứa lên `h-[55%]` và `left-[2%] right-[2%]`, tăng tỷ lệ zoom mặc định lên `1.2x` (lớn hơn ~45%), bổ sung các nút chọn tỷ lệ nhanh `100%`, `125%`, `150%` và nút Toàn màn hình giúp nhìn rõ từng chi tiết trên mặt bằng quy hoạch |
 | **Bố Cục Section Chuẩn Khít Wireframe (Overlapping Layout)** | ✅ Hoàn thành | Đã điều chỉnh cấu trúc layout cột trái khớp 100% bản vẽ wireframe: Khối `PROJECT PLAN` dạng card nổi (`border-2 border-slate-900 shadow-2xl z-20`) đặt ở góc dưới và **chồng lên phần đáy của khối `MAP`**, bỏ viền bao bọc bên ngoài |
 | **Bản đồ Thực Tế 100% (OpenStreetMap)** | ✅ Hoàn thành | MAP ở trên là 100% bản đồ thực tế mã nguồn mở OpenStreetMap (không hiển thị ảnh mặt bằng trong khung map), chỉ thẳng và vẽ trực tiếp các khung chữ nhật căn hộ lên mặt bản đồ để người dùng click chọn |
