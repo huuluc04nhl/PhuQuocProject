@@ -102,7 +102,7 @@ export const DEMO_UNITS: Unit[] = [
       [10.84015, 106.83935],
       [10.84050, 106.83995],
     ],
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    videoUrl: 'https://www.youtube.com/watch?v=jYk7ZBb1hA4',
     images: [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
@@ -146,7 +146,7 @@ export const DEMO_UNITS: Unit[] = [
       [10.83827, 106.83865],
       [10.83880, 106.83955],
     ],
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+    videoUrl: 'https://www.youtube.com/watch?v=M8nzM4p9xF4',
     images: [
       'https://images.unsplash.com/photo-1541888946425-d0fbb1861593?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80',
@@ -190,7 +190,7 @@ export const DEMO_UNITS: Unit[] = [
       [10.84025, 106.84095],
       [10.84055, 106.84145],
     ],
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    videoUrl: 'https://www.youtube.com/watch?v=1IAsjVODFFU',
     images: [
       'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
@@ -238,7 +238,7 @@ export const DEMO_UNITS: Unit[] = [
       [10.83725, 106.84415],
       [10.83775, 106.84485],
     ],
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    videoUrl: 'https://www.youtube.com/watch?v=-ngXMfgjQuM',
     images: [
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
@@ -287,7 +287,7 @@ export const DEMO_UNITS: Unit[] = [
       'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
     ],
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    videoUrl: 'https://www.youtube.com/watch?v=2wxzxN0Fthw',
   },
 
   // ==========================================
@@ -330,6 +330,7 @@ export const DEMO_UNITS: Unit[] = [
       [10.84110, 106.85190],
       [10.84190, 106.85310],
     ],
+    videoUrl: 'https://www.youtube.com/watch?v=Q8bweRzaLBk',
     images: [
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80',
