@@ -53,6 +53,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const markerRef = useRef<any>(null);
   const isInitializedRef = useRef<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
 
   // Cập nhật lại kích thước bản đồ khi mở / đóng fullscreen
   useEffect(() => {
@@ -94,6 +95,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       layersGroupRef.current = layersGroup;
       mapInstanceRef.current = map;
       isInitializedRef.current = true;
+      setIsMapReady(true);
     });
 
     return () => {
@@ -101,13 +103,14 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         isInitializedRef.current = false;
+        setIsMapReady(false);
       }
     };
   }, []);
 
   // 2. Vẽ trực tiếp các KHUNG CĂN HỘ với BORDER NỔI BẬT & MÀU THEO TRẠNG THÁI
   useEffect(() => {
-    if (!mapInstanceRef.current || !layersGroupRef.current) return;
+    if (!isMapReady || !mapInstanceRef.current || !layersGroupRef.current) return;
 
     import('leaflet').then((L) => {
       const map = mapInstanceRef.current;
@@ -210,7 +213,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         { icon: customIcon, interactive: false }
       ).addTo(map);
     });
-  }, [selectedUnit, selectedZone, units, onSelectUnit]);
+  }, [isMapReady, selectedUnit, selectedZone, units, onSelectUnit]);
 
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
