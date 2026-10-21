@@ -106,22 +106,19 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         attributionControl: true,
       });
 
-      // Layer bản đồ thực tế chuẩn OpenStreetMap được phục vụ qua CartoDB Voyager CDN (Cloudflare toàn cầu, tải cực nhanh tại VN, 100% không bị chặn trên 4G/5G mobile)
-      const tileLayer = L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        {
-          maxZoom: 19,
-          subdomains: ['a', 'b', 'c', 'd'],
-          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        }
-      );
+      // Layer bản đồ thực tế chuẩn OpenStreetMap 100% miễn phí, không watermark, phân tải song song subdomains a/b/c
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      });
 
-      // Cơ chế tự động Fallback sang cụm máy chủ OpenStreetMap trực tiếp nếu kết nối CartoDB có sự cố
+      // Tự động fallback sang Esri World Street nếu kết nối mạng di động bị chặn, đảm bảo không bao giờ bị watermark và không cần API key
       tileLayer.on('tileerror', (error: any) => {
-        if (error?.tile && !error.tile.src.includes('openstreetmap')) {
+        if (error?.tile && !error.tile.src.includes('arcgisonline')) {
           const coords = error.coords;
           if (coords) {
-            error.tile.src = `https://a.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
+            error.tile.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${coords.z}/${coords.y}/${coords.x}`;
           }
         }
       });
